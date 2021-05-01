@@ -1,0 +1,62 @@
+{% extends "blog_app/base.html" %}
+
+{% block title %}
+	<title>Blog</title>
+{% endblock %}
+
+{% block body %}
+	<h1 class="posttitle loader">{{ postmodel.title }}</h1>
+
+	{% if postmodel.publish_date %}
+	<div class="date postdate">
+		{{ postmodel.publish_date }}
+	</div>
+
+	{% else %}
+		<a class="btn btn-outline-dark" 
+			href="{% url 'post_publish' pk=postmodel.pk %}">
+			<h3 class="btn-publish">
+				Publish
+			</h3>
+		</a>
+	{% endif %}
+
+	<p class="postcontent">{{ postmodel.text|safe|linebreaksbr }}</p>
+	
+	{% if user.is_authenticated %}
+		<a class="btn btn-primary" href="{% url 'post_edit' pk=postmodel.pk %}">
+			<span class="glyphicon glyphicon-pencil"></span>
+		</a>
+		<a class="btn btn-primary" href="{% url 'post_remove' pk=postmodel.pk %}">
+			<span class="glyphicon glyphicon-remove"></span>
+		</a>
+	{% endif %}
+
+	<hr>
+	<a href="{% url 'add_comment_to_post' pk=postmodel.pk %}" class="btn btn-primary btn-comment">Add Comment</a>
+
+	<div class="container">
+		{% for comment in postmodel.comments.all %}
+			<br>
+
+			{% if user.is_authenticated or comment.approved_comment %}
+				{{ comment.create_date }}
+
+				{% if not comment.approved_comment %}
+					<a class="btn btn-default" href="{% url 'comment_remove' pk=comment.pk %}">
+						<span class="glyphicon glyphicon-remove"></span>
+					</a>
+					<a class="btn btn-primary" href="{% url 'comment_approve' pk=comment.pk %}">
+						<span class="glyphicon glyphicon-ok"></span>
+					</a>
+				{% endif %}
+
+			<p>{{ comment.text|safe|linebreaks }}</p>
+			<p>Posted by: <span style="color: red;">{{ comment.author }}</span></p>
+			{% endif %}
+		{% empty %}
+			<p>No Comments!</p>
+		{% endfor %}
+	</div>
+
+{% endblock %}
